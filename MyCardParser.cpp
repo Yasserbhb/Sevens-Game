@@ -4,12 +4,20 @@
 namespace sevens {
 
 void MyCardParser::read_cards(const std::string& /*filename*/) {
-    // TODO: For example, create a standard 52-card deck.
-    // Or read from an input file.
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Erreur : impossible d’ouvrir le fichier " << filename << "\n";
+        return;
+    }
 
-    // Example stub:
-    std::cout << "[MyCardParser::read_cards] TODO: create the deck or parse from file.\n";
-    // e.g., this->cards_hashmap[0] = Card{0, 1}; etc.
+    int id = 0;
+    int suit, rank;
+    while (file >> suit >> rank) {
+        cards_hashmap[id] = Card{suit, rank};
+        ++id;
+    }
+
+    std::cout << "[MyCardParser::read_cards] " << id << " cartes lues depuis " << filename << "\n";
 }
 
 } // namespace sevens

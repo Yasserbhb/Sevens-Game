@@ -1,5 +1,8 @@
 #include "MyCardParser.hpp"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 namespace sevens {
 

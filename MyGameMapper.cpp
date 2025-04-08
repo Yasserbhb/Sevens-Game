@@ -17,7 +17,7 @@ void MyGameMapper::read_game(const std::string& filename) {
     // TODO: e.g., initialize table_layout with 7s
     std::cout << "[MyGameMapper::read_game] TODO: set up table layout.\n";
 }
-
+//
 bool MyGameMapper::hasRegisteredStrategies() const {
     // TODO: Return whether any strategies have been registered
     return false;

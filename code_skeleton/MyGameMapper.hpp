@@ -22,6 +22,7 @@ public:
     std::vector<std::pair<uint64_t, uint64_t>>
     compute_game_progress(uint64_t numPlayers) override;
 
+    
     std::vector<std::pair<uint64_t, uint64_t>>
     compute_and_display_game(uint64_t numPlayers) override;
     

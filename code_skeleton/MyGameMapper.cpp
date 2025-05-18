@@ -191,7 +191,7 @@ void MyGameMapper::dealCards() {
 // Play multiple rounds until a player accumulates 50 cards
 std::vector<std::pair<uint64_t, uint64_t>>
 MyGameMapper::runMultipleRounds(bool displayOutput) {
-    const uint64_t MAX_ACCUMULATED_CARDS = 50;
+    const uint64_t MAX_ACCUMULATED_CARDS = 5000;
     bool gameOver = false;
     total_rounds = 0;
     

@@ -43,6 +43,18 @@ echo ""
 echo "Compiling EndgameStrategy SO..."
 g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/EndgameStrategy.cpp -o testing/endgame_strategy.so
 
+echo ""
+echo "Compiling MirrorStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL MirrorStrategy.cpp -o testing/mirror_strategy.so
+
+echo ""
+echo "Compiling BalanceStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL BalanceStrategy.cpp -o testing/balance_strategy.so
+
+echo ""
+echo "Compiling TempoStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL TempoStrategy.cpp -o testing/tempo_strategy.so
+
 
 echo ""
 echo "Done!"

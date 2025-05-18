@@ -40,5 +40,10 @@ echo "Compiling BalanceStrategy SO..."
 g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton/BalanceStrategy.cpp -o testing/balance_strategy.so
 
 
+# Add this to your compile.sh file
+echo ""
+echo "Compiling EnhancedSequenceStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton/EnhancedSequenceStrategy.cpp -o testing/enhanced_sequence_strategy.so
+
 echo ""
 echo "Done!"

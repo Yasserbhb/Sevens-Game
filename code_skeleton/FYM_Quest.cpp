@@ -407,14 +407,8 @@ private:
 
 } // namespace sevens
 
-#ifdef BUILDING_DLL
-extern "C" {
-    // Export function for dynamic library loading - works on both Windows and Linux
-    #ifdef _WIN32
-    __declspec(dllexport)
-    #endif
-    sevens::PlayerStrategy* createStrategy() {
-        return new sevens::UltimateStrategy();
-    }
+#ifdef BUILD_SHARED_LIB
+extern "C" sevens::PlayerStrategy* createStrategy() {
+    return new sevens::UltimateStrategy();
 }
 #endif

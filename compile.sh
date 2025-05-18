@@ -22,5 +22,27 @@ echo ""
 echo "Compiling StudentStrategy SO..."
 g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/FYM_Quest.cpp -o testing/FYM_Quest.so
 
+echo "TESTING STRATS:  "
+echo ""
+echo "Compiling SequenceStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/SequenceStrategy.cpp -o testing/sequence_strategy.so
+
+echo ""
+echo "Compiling BlockingStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/BlockingStrategy.cpp -o testing/blocking_strategy.so
+
+echo ""
+echo "Compiling SevensRushStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/SevensRushStrategy.cpp -o testing/sevens_rush_strategy.so
+
+echo ""
+echo "Compiling AdaptiveStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/AdaptiveStrategy.cpp -o testing/adaptive_strategy.so
+
+echo ""
+echo "Compiling EndgameStrategy SO..."
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/EndgameStrategy.cpp -o testing/endgame_strategy.so
+
+
 echo ""
 echo "Done!"

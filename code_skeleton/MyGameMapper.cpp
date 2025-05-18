@@ -181,17 +181,21 @@ void MyGameMapper::dealCards() {
     // Shuffle the cards
     std::shuffle(cards.begin(), cards.end(), rng);
    
-    // Deal cards to players
+    // Determine starting player based on round number
+    // This rotates who gets the first card (and potentially extra cards) each round
+    uint64_t startingPlayerID = total_rounds % player_strategies.size();
+    
+    // Deal cards to players with rotation
     for (uint64_t i = 0; i < cards.size(); i++) {
-        uint64_t playerID = i % player_strategies.size();
-        player_hands[playerID].push_back(cards[i].second);
+        uint64_t playerIndex = (startingPlayerID + i) % player_strategies.size();
+        player_hands[playerIndex].push_back(cards[i].second);
     }
 }
 
 // Play multiple rounds until a player accumulates 50 cards
 std::vector<std::pair<uint64_t, uint64_t>>
 MyGameMapper::runMultipleRounds(bool displayOutput) {
-    const uint64_t MAX_ACCUMULATED_CARDS = 5000;
+    const uint64_t MAX_ACCUMULATED_CARDS = 100000;
     bool gameOver = false;
     total_rounds = 0;
     

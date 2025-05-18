@@ -19,6 +19,8 @@ echo "Compiling GreedyStrategy SO..."
 g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/GreedyStrategy.cpp -o testing/greedy_strategy.so
 
 
+echo Compiling StudentStrategy DLL...
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/StudentTemplate.cpp -o testing/student_strategy.so
 
 echo ""
 echo "Done!"

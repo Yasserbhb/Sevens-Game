@@ -20,7 +20,7 @@ g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/GreedySt
 
 echo ""
 echo "Compiling StudentStrategy SO..."
-g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/StudentTemplate.cpp -o testing/student_strategy.so
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton/FYM_Quest.cpp -o testing/FYM_Quest.so
 
 echo ""
 echo "Done!"

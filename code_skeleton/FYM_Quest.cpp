@@ -17,9 +17,9 @@ namespace sevens {
  * An advanced strategy for the Sevens card game that implements sophisticated
  * decision-making algorithms to maximize win rate.
  */
-class AdvancedStrategy : public PlayerStrategy {
+class FYM_Quest : public PlayerStrategy {
 public:
-    AdvancedStrategy() {
+    FYM_Quest() {
         // Seed the RNG with the current time
         auto seed = static_cast<unsigned long>(
             std::chrono::system_clock::now().time_since_epoch().count()
@@ -44,7 +44,7 @@ public:
         }
     }
     
-    ~AdvancedStrategy() override = default;
+    ~FYM_Quest() override = default;
     
     void initialize(uint64_t playerID) override {
         myID = playerID;
@@ -179,7 +179,7 @@ public:
     }
     
     std::string getName() const override {
-        return "AdvancedStrategy";
+        return "FYM_Quest";
     }
     
 private:
@@ -612,7 +612,7 @@ extern "C" {
     __declspec(dllexport)
     #endif
     sevens::PlayerStrategy* createStrategy() {
-        return new sevens::AdvancedStrategy();
+        return new sevens::FYM_Quest();
     }
 }
 #endif

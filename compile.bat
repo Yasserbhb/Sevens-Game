@@ -23,7 +23,7 @@ g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton\GreedySt
 
 echo.
 echo Compiling StudentStrategy DLL...
-g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton\StudentTemplate.cpp -o testing\student_strategy.dll
+g++ -std=c++17 -Wall -Wextra -shared -fPIC -DBUILDING_DLL code_skeleton\FYM_Quest.cpp -o testing\FYM_Quest.dll
 
 echo.
 echo Done!

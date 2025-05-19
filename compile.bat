@@ -39,4 +39,16 @@ echo Compiling BalanceStrategy DLL...
 g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton\BalanceStrategy.cpp -o testing\balance_strategy.dll
 
 echo.
+echo Compiling HybridStrategy DLL...
+g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton\HybridStrategy.cpp -o testing\hybrid_strategy.dll
+
+echo.
+echo Compiling EnhancedSequenceStrategy DLL...
+g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton\EnhancedSequenceStrategy.cpp -o testing\enhancedsequence_strategy.dll
+
+echo.
+echo Compiling UltimateStrategy DLL...
+g++ -std=c++17 -Wall -Wextra -O3 -shared -fPIC -DBUILD_SHARED_LIB code_skeleton\UltimateStrategy.cpp -o testing\ultimate_strategy.dll
+
+echo.
 echo Done!

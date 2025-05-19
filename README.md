@@ -24,7 +24,7 @@ Our FYM_Quest strategy employs an adaptive, multi-factor decision system that co
 Our strategy follows a comprehensive decision process that analyzes the game state, identifies playable cards, and selects the optimal move based on multiple strategic factors that adapt as the game progresses.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000', 'lineColor': '#FF0000' }}}%%
 flowchart TD
     Start([FYM_Quest Strategy]) --> StateAnalysis["Game State Analysis<br><i>Input: Hand, Table Layout</i><br><i>Output: Game State Model</i>"]
     StateAnalysis --> FindCards["Find Playable Cards<br><i>Input: Hand, Table Layout</i><br><i>Output: List of Playable Cards</i>"]
@@ -64,6 +64,8 @@ flowchart TD
     classDef phase fill:#fef9e7,stroke:#d4ac0d,stroke-width:1px,color:#000;
     classDef scoring fill:#e8daef,stroke:#6c3483,stroke-width:1px,color:#000;
     
+    linkStyle default stroke:#FF0000,stroke-width:2px;
+    
     class Start,Pass,PlaySingle,PlayCard terminal;
     class StateAnalysis,FindCards,PhaseDetect,ScoreCards,SelectCard mainflow;
     class Decision decision;
@@ -77,7 +79,7 @@ flowchart TD
 A key innovation in our approach is the sequence analysis system that simulates potential card sequences to identify moves that enable the longest chain of consecutive plays. This forward-looking simulation gives our strategy a significant advantage over simpler approaches that only consider the immediate game state.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000', 'lineColor': '#FF0000' }}}%%
 flowchart TD
     Start([Sequence Analysis]) --> Input["Inputs: Card to evaluate, Current hand, Table layout"]
     Input --> SimTable["Create Simulated Table with Selected Card Played"]
@@ -104,6 +106,8 @@ flowchart TD
     classDef terminal fill:#d5f5e3,stroke:#1e8449,stroke-width:1px,color:#000;
     classDef example fill:#fef9e7,stroke:#d4ac0d,stroke-width:1px,color:#000;
     
+    linkStyle default stroke:#FF0000,stroke-width:2px;
+    
     class Start,Result terminal;
     class Input,SimTable,MarkPlayed,FindPlayable,NextCard,PlayNext,UpdatePlayable mainproc;
     class CheckPlayable decision;
@@ -115,7 +119,7 @@ flowchart TD
 Each potential move is evaluated using six strategic factors, weighted according to the current game phase. This sophisticated scoring system enables our strategy to adapt its priorities as the game evolves, optimizing decision-making for each situation.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'arial', 'primaryTextColor': '#000000', 'lineColor': '#FF0000' }}}%%
 flowchart TD
     Start([Card Scoring Process]) --> Inputs["Inputs: Playable card, Current hand, Table layout, Game phase & weights"]
     
@@ -148,6 +152,8 @@ flowchart TD
     classDef formula fill:#f5cba7,stroke:#a04000,stroke-width:1px,color:#000;
     classDef terminal fill:#d5f5e3,stroke:#1e8449,stroke-width:1px,color:#000;
     classDef phase fill:#fef9e7,stroke:#d4ac0d,stroke-width:1px,color:#000;
+    
+    linkStyle default stroke:#FF0000,stroke-width:2px;
     
     class Start,Result terminal;
     class Inputs,Factors,WeightApply mainproc;

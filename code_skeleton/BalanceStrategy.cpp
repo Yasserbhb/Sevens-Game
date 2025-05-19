@@ -9,6 +9,7 @@
 
 namespace sevens {
 
+    
 /**
  * BalanceStrategy: Cette stratégie maintient un équilibre parfait entre les couleurs
  * dans la main du joueur, priorisant l'élimination des cartes dans les couleurs

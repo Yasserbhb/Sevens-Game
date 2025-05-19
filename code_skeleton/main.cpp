@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Running in internal mode with default random strategies\n";
         
         // For internal mode, we'll use 4 players with RandomStrategy
-        uint64_t numPlayers = 10;
+        uint64_t numPlayers = 3;
         for (uint64_t i = 0; i < numPlayers; i++) {
             auto strategy = std::make_shared<RandomStrategy>();
             gameMapper.registerStrategy(i, strategy);

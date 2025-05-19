@@ -1,135 +1,29 @@
-# Sevens Card Game - TeamFYM Strategy
+# Important Notes :
 
-## Project Structure
-- `code_skeleton/` - All source code files including:
-  - Game framework files (.cpp and .hpp)
-  - RandomStrategy and GreedyStrategy implementations
-  - Our TeamFYM_Strategy implementation
-  - cards.txt file with deck configuration
-- `testing/` - All compiled files and executables
-- `compile.bat`/`compile.sh` - Compilation scripts
+1. **Our Strategy and Code Files**: The `code_skeleton` directory contains all the code files, including our team's custom strategy (`FYM_Quest.cpp`), the test strategies (Random and Greedy), and all framework files. 
 
-## Compiling the Game
+2. **Cross-Platform Support**:
+   * The project has been compiled for both Linux (`.so` files, `sevens_game` executable) and Windows (`.dll` files, `sevens_game.exe` executable)
+   * Our strategy (`FYM_Quest.so`/`.dll`) and the main executables are in the root directory
+   * The test strategies (random and greedy) are in the `testing` directory
 
-### Windows
-1. Open Command Prompt in the project directory
-2. Run the compilation script:
-```
-compile.bat
-```
+3. **Compilation**:
+   * Use `compile.sh` (Linux) or `compile.bat` (Windows) in the root directory to recompile the project if needed
+   * These scripts will compile:
+     * The main game executable (`sevens_game`/`sevens_game.exe`) in the root
+     * Our team strategy (`FYM_Quest.so`/`FYM_Quest.dll`) in the root
+     * The test strategies in the testing directory
 
-This creates in the `testing` directory:
-- `sevens_game.exe` (main game executable)
-- `random_strategy.dll` (RandomStrategy library)
-- `greedy_strategy.dll` (GreedyStrategy library)
-- `teamFYM_strategy.dll` (Our TeamFYM_Strategy library)
-- Copy of cards.txt for testing
+4. **Running the Game**:
+   * From the root directory, run our strategy against the test strategies using:
+     
+     For Linux:
+     ```
+     ./sevens_game competition FYM_Quest.so testing/random_strategy.so testing/greedy_strategy.so
+     ```
+     
+     For Windows:
+     ```
+     sevens_game.exe competition FYM_Quest.dll testing\random_strategy.dll testing\greedy_strategy.dll
+     ```
 
-### Linux
-1. Open Terminal in the project directory
-2. Make the compilation script executable (first time only):
-```bash
-chmod +x compile.sh
-```
-3. Run the compilation script:
-```bash
-./compile.sh
-```
-
-This creates in the `testing` directory:
-- `sevens_game` (main game executable)
-- `random_strategy.so` (RandomStrategy library)
-- `greedy_strategy.so` (GreedyStrategy library)
-- `teamFYM_strategy.so` (Our TeamFYM_Strategy library)
-- Copy of cards.txt for testing
-
-## Running the Game
-
-First, navigate to the testing directory:
-
-**Windows**:
-```
-cd testing
-```
-
-**Linux**:
-```
-cd testing
-```
-
-### Internal Mode (4 Random Players)
-**Windows**:
-```
-sevens_game.exe internal
-```
-
-**Linux**:
-```
-./sevens_game internal
-```
-
-### Demo Mode (RandomStrategy vs GreedyStrategy)
-**Windows**:
-```
-sevens_game.exe demo
-```
-
-**Linux**:
-```
-./sevens_game demo
-```
-
-### Competition Mode (Test Your Strategy)
-**Windows**:
-```
-sevens_game.exe competition teamFYM_strategy.dll random_strategy.dll greedy_strategy.dll
-```
-
-**Linux**:
-```
-./sevens_game competition teamFYM_strategy.so random_strategy.so greedy_strategy.so
-```
-
-You can change the order or include only certain strategies:
-
-**Windows**:
-```
-sevens_game.exe competition teamFYM_strategy.dll greedy_strategy.dll
-```
-
-**Linux**:
-```
-./sevens_game competition teamFYM_strategy.so greedy_strategy.so
-```
-
-## Strategy Description
-
-TeamFYM_Strategy implements a sophisticated approach to the Sevens card game:
-
-### Key Features:
-1. **Multi-phase approach**:
-   - Early game: Prioritizes playing 7s first to open lanes, then high-value cards
-   - Mid-late game: Uses a scoring system for strategic card selection
-
-2. **Card tracking**:
-   - Maintains record of all played cards
-   - Tracks available cards still in play
-   - Monitors opponent moves and passes
-
-3. **Strategic card selection**:
-   - Scores potential plays based on multiple factors:
-     - Base preference for higher cards (to empty hand faster)
-     - Bonus for playing 7s (opening new play options)
-     - Bonus for cards that enable more of your hand to be played
-     - Adaptive penalties based on opponent behavior
-
-4. **Opponent analysis**:
-   - Records pass patterns to infer which cards opponents might not have
-   - Adjusts strategy based on game progression
-
-## Authors
-- Yasser BOUHAI
-- Fayçal CHEMLI
-- Mohammed ADJIMI
-## Notes for Submission
-For final submission, only the TeamFYM_Strategy.cpp file (and any associated header files) need to be submitted. All testing infrastructure is only for development purposes.

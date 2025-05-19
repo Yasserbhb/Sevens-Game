@@ -1,202 +1,83 @@
-// HybridStrategy.cpp
-// Combinaison des points forts des stratégies Sequence, Blocking, Balance et SevensRush
-
 #include "PlayerStrategy.hpp"
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <array>
 #include <algorithm>
 #include <random>
 #include <chrono>
 #include <string>
-#include <cmath>
 
 namespace sevens {
 
-/**
- * HybridStrategy
- *  - Séquences longues (Sequence/EnhancedSequence) ⟶ vider la main rapidement.
- *  - Équilibre des couleurs (Balance).
- *  - Gestion prudente des 7 + blocage (Blocking).
- *  - Accélération fin de partie + singletons (SevensRush).
- */
 class HybridStrategy : public PlayerStrategy {
+    using Table = std::unordered_map<uint64_t,std::unordered_map<uint64_t,bool>>;
 public:
-    HybridStrategy() {
-        auto seed = static_cast<unsigned long>(
-            std::chrono::high_resolution_clock::now().time_since_epoch().count());
-        rng.seed(seed);
-    }
-    ~HybridStrategy() override = default;
+    HybridStrategy(){ rng.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count()); }
+    void initialize(uint64_t pid) override { myID=pid; passStreak=0; playersSeen.clear(); playersSeen.insert(pid);}    
 
-    void initialize(uint64_t playerID) override {
-        myID = playerID;
-        roundTurn = 0;
-    }
+    int selectCardToPlay(const std::vector<Card>& hand,const Table& table) override {
+        // collect playable
+        std::vector<int> playable; for(int i=0;i<(int)hand.size();++i) if(isPlayable(hand[i],table)) playable.push_back(i);
+        if(playable.empty()){ ++passStreak; return -1; }
+        passStreak=0;
 
-    int selectCardToPlay(const std::vector<Card>& hand,
-                         const std::unordered_map<uint64_t,
-                         std::unordered_map<uint64_t,bool>>& tableLayout) override {
-        roundTurn++;
+        // fast heuristic score for each playable
+        std::vector<std::pair<int,double>> scored; scored.reserve(playable.size());
+        auto suitCnt=countSuit(hand); auto imb=suitImbalance(suitCnt,hand.size());
+        for(int idx:playable){ scored.push_back({idx,heuristic(idx,hand,table,suitCnt,imb)}); }
+        std::sort(scored.begin(),scored.end(),[](auto&a,auto&b){return a.second>b.second;});
 
-        // Trouver les cartes jouables
-        std::vector<int> playableIdx = findPlayableCards(hand, tableLayout);
-        if (playableIdx.empty()) return -1;
-        if (playableIdx.size()==1) return playableIdx[0];
-
-        // Stats sur la main
-        auto suitCounts = countSuit(hand);
-        auto suitImb    = suitImbalance(suitCounts, hand.size());
-        int gamePhase   = phase(hand);
-
-        int bestIdx = playableIdx[0];
-        double bestScore = -1e9;
-
-        for (int idx : playableIdx) {
-            const Card& c = hand[idx];
-            double score = 1.0;
-
-            // 1. Longueur de séquence potentielle
-            int seqLen = sequenceLength(idx, hand, tableLayout);
-            score += SEQ_W * seqLen;
-
-            // 2. Gestion des 7
-            if (c.rank==7) {
-                double sevenScore = SEVEN_W;
-                if (suitCounts[c.suit]>=3 || suitImb[c.suit]>0) sevenScore += 1.0;
-                else if (gamePhase<2) sevenScore -= 2.0; // garder pour bloquer
-                score += sevenScore;
-            }
-
-            // 3. Équilibre des couleurs : jouer cartes des couleurs en excès
-            score += BAL_W * suitImb[c.suit];
-
-            // 4. Blocage : bonus si ne débloque pas de nouvelle extrémité
-            if (!willEnableOpponents(c, tableLayout)) score += BLOCK_W;
-
-            // 5. Coupures futures
-            int future = futurePlays(idx, hand, tableLayout);
-            score += FUTURE_W * future;
-
-            // 6. Cartes extrêmes + singletons pour fin de partie
-            if (isExtreme(c)) score += EXT_W;
-            if (isSingleton(c, hand)) score += SINGLE_W;
-            if (gamePhase==2) score += 0.5; // accélérer la sortie
-
-            // 7. petit hasard
-            score += std::uniform_real_distribution<>(0.0,0.15)(rng);
-
-            if (score>bestScore) {bestScore=score; bestIdx=idx;}
-        }
+        // Monte‑Carlo light on top‑K
+        const int K=std::min(4,(int)scored.size());
+        int sims=25; // per move → ≤100 playouts total
+        double bestVal=-1e9; int bestIdx=scored[0].first;
+        for(int k=0;k<K;++k){ double val=0; for(int s=0;s<sims;++s){ val+=simulatePlayout(scored[k].first,hand,table);} val/=sims; if(val>bestVal){bestVal=val; bestIdx=scored[k].first;}}
         return bestIdx;
     }
 
-    void observeMove(uint64_t /*playerID*/, const Card& /*playedCard*/) override {}
-    void observePass(uint64_t /*playerID*/) override {}
-    std::string getName() const override {return "HybridStrategy";}
-
+    void observeMove(uint64_t pid,const Card&/*c*/) override {playersSeen.insert(pid);}    void observePass(uint64_t pid) override {playersSeen.insert(pid);}    std::string getName() const override {return "HybridMCTS";}
 private:
-    // Constantes de pondération
-    static constexpr double SEQ_W = 2.0;
-    static constexpr double SEVEN_W = 1.0;
-    static constexpr double BAL_W = 0.6;
-    static constexpr double BLOCK_W = 0.8;
-    static constexpr double FUTURE_W = 0.4;
-    static constexpr double EXT_W = 0.6;
-    static constexpr double SINGLE_W = 0.7;
+    // weights
+    static constexpr double SEQ_W=2.6,FUT_W=0.6,SEVEN_W=1.2,BAL_W=0.5,BLOCK_W=0.9,EXT_W=0.4,SING_W=0.4;
 
-    uint64_t myID{};
-    int roundTurn{};
-    std::mt19937 rng;
+    uint64_t myID{}; std::mt19937 rng; int passStreak{0}; std::unordered_set<uint64_t>playersSeen;
 
-    // ---------- Helpers ----------
-    std::vector<int> findPlayableCards(const std::vector<Card>& hand,
-        const std::unordered_map<uint64_t, std::unordered_map<uint64_t,bool>>& table) const {
-        std::vector<int> out;
-        for (int i=0;i<(int)hand.size();++i)
-            if (isPlayable(hand[i], table)) out.push_back(i);
-        return out;
+    // ---------- Heuristic ----------
+    double heuristic(int idx,const std::vector<Card>& h,const Table& tbl,const std::array<int,4>& suitCnt,const std::array<double,4>& imb) const{
+        const Card& c=h[idx]; double s=0;
+        s+=SEQ_W*deepSeq(idx,h,tbl,2);
+        s+=FUT_W*futurePlayable(idx,h,tbl);
+        if(c.rank==7){ double v=(suitCnt[c.suit]>=3?1:-1); s+=SEVEN_W*v;}
+        s+=BAL_W*imb[c.suit];
+        if(!opensNewEnd(c,tbl)) s+=BLOCK_W;
+        if(isExtreme(c)) s+=EXT_W; if(isSingleton(c,h)) s+=SING_W;
+        return s;
     }
 
-    bool isPlayable(const Card& card,
-        const std::unordered_map<uint64_t, std::unordered_map<uint64_t,bool>>& table) const {
-        int suit=card.suit, rank=card.rank;
-        if (rank==7) {
-            return !(table.count(suit)&&table.at(suit).count(rank)&&table.at(suit).at(rank));
-        }
-        bool high = (rank<13 && table.count(suit)&& table.at(suit).count(rank+1)&&table.at(suit).at(rank+1));
-        bool low  = (rank>1  && table.count(suit)&& table.at(suit).count(rank-1)&&table.at(suit).at(rank-1));
-        return high||low;
+    // ---------- Monte‑Carlo playout ----------
+    double simulatePlayout(int idx,const std::vector<Card>& hand,const Table& table) const{
+        // Copy state
+        Table t=table; std::vector<Card> h=hand; Card first=h[idx]; t[first.suit][first.rank]=true; h.erase(h.begin()+idx);
+        int moves=1;
+        // random shuffle remaining for quick rollout
+        std::shuffle(h.begin(),h.end(),rng);
+        for(const Card& c:h){ if(isPlayable(c,t)){ t[c.suit][c.rank]=true; ++moves; }}
+        return moves; // more moves we can play ⇒ better
     }
 
-    std::array<int,4> countSuit(const std::vector<Card>& hand) const {
-        std::array<int,4> c{0,0,0,0};
-        for (const auto& card: hand) c[card.suit]++;
-        return c;
-    }
-
-    std::array<double,4> suitImbalance(const std::array<int,4>& cnt, size_t n) const {
-        std::array<double,4> im{};
-        double ideal = static_cast<double>(n)/4.0;
-        for (int s=0;s<4;++s) im[s]=cnt[s]-ideal;
-        return im;
-    }
-
-    int phase(const std::vector<Card>& hand) const {
-        if (hand.size()>10) return 0; // early
-        if (hand.size()>5)  return 1; // mid
-        return 2; // late
-    }
-
-    int sequenceLength(int idx, const std::vector<Card>& hand,
-        const std::unordered_map<uint64_t, std::unordered_map<uint64_t,bool>>& table) const {
-        const Card& card = hand[idx];
-        int len=1, suit=card.suit, rank=card.rank;
-        auto sim = table; sim[suit][rank]=true;
-        // Descendre
-        for (int r=rank-1;r>=1;--r) {
-            bool have=false;
-            for (const auto& c: hand) if (c.suit==suit&&c.rank==r) {have=true; break;}
-            if (!have) break;
-            if (r==rank-1 || (sim[suit].count(r+1)&&sim[suit][r+1])) {sim[suit][r]=true; ++len;} else break;
-        }
-        // Monter
-        for (int r=rank+1;r<=13;++r) {
-            bool have=false;
-            for (const auto& c: hand) if (c.suit==suit&&c.rank==r) {have=true; break;}
-            if (!have) break;
-            if (r==rank+1 || (sim[suit].count(r-1)&&sim[suit][r-1])) {sim[suit][r]=true; ++len;} else break;
-        }
-        return len;
-    }
-
-    bool willEnableOpponents(const Card& card,
-        const std::unordered_map<uint64_t, std::unordered_map<uint64_t,bool>>& table) const {
-        if (card.rank==7) return true; // ouvre deux côtés
-        int suit=card.suit, rank=card.rank;
-        bool lowOn= (rank>1  && table.count(suit)&&table.at(suit).count(rank-1)&&table.at(suit).at(rank-1));
-        bool highOn=(rank<13 && table.count(suit)&&table.at(suit).count(rank+1)&&table.at(suit).at(rank+1));
-        // Jouer une extrémité nouvelle ?
-        return !(lowOn && highOn);
-    }
-
-    int futurePlays(int idx,const std::vector<Card>& hand,
-        const std::unordered_map<uint64_t, std::unordered_map<uint64_t,bool>>& table) const {
-        auto sim=table; const Card& pc=hand[idx]; sim[pc.suit][pc.rank]=true; int c=0;
-        for (int i=0;i<(int)hand.size();++i){if(i==idx) continue; if(isPlayable(hand[i],sim)) ++c;}
-        return c;
-    }
-
-    bool isExtreme(const Card& c) const {return c.rank<=3||c.rank>=11;}
-    bool isSingleton(const Card& c, const std::vector<Card>& hand) const {
-        int cnt=0; for(const auto& x:hand) if(x.suit==c.suit) ++cnt; return cnt==1;}
+    // ---------- utils ----------
+    bool isPlayable(const Card& cd,const Table& tbl) const{ auto it=tbl.find(cd.suit); if(cd.rank==7) return !(it!=tbl.end()&&it->second.count(7)&&it->second.at(7)); if(it==tbl.end()) return false; const auto&r=it->second; return (cd.rank<13&&r.count(cd.rank+1)&&r.at(cd.rank+1))||(cd.rank>1&&r.count(cd.rank-1)&&r.at(cd.rank-1));}
+    bool opensNewEnd(const Card& c,const Table&tbl) const{ if(c.rank==7) return true; auto it=tbl.find(c.suit); if(it==tbl.end()) return true; const auto&r=it->second; bool lo=(c.rank>1&&r.count(c.rank-1)&&r.at(c.rank-1)); bool hi=(c.rank<13&&r.count(c.rank+1)&&r.at(c.rank+1)); return !(lo&&hi);}    
+    std::array<int,4> countSuit(const std::vector<Card>& h) const{ std::array<int,4>cnt{0,0,0,0}; for(auto&c:h)cnt[c.suit]++; return cnt; }
+    std::array<double,4> suitImbalance(const std::array<int,4>&cnt,size_t n) const{ std::array<double,4>im{}; double ideal=n/4.0; for(int i=0;i<4;++i) im[i]=cnt[i]-ideal; return im; }
+    int deepSeq(int idx,const std::vector<Card>&h,const Table&tbl,int depth) const{ Table sim=tbl; const Card&st=h[idx]; sim[st.suit][st.rank]=true; int len=1; std::vector<Card> rem; for(int i=0;i<(int)h.size();++i) if(i!=idx) rem.push_back(h[i]); for(int d=0;d<depth;++d){ bool moved=false; for(size_t j=0;j<rem.size();++j){ if(isPlayable(rem[j],sim)){ sim[rem[j].suit][rem[j].rank]=true; rem.erase(rem.begin()+j); ++len; moved=true; break; }} if(!moved) break;} return len; }
+    int futurePlayable(int idx,const std::vector<Card>&h,const Table&tbl) const{ Table sim=tbl; const Card&c=h[idx]; sim[c.suit][c.rank]=true; int cnt=0; for(int i=0;i<(int)h.size();++i) if(i!=idx&&isPlayable(h[i],sim)) ++cnt; return cnt; }
+    bool isExtreme(const Card& c) const{return c.rank<=3||c.rank>=11;}
+    bool isSingleton(const Card& c,const std::vector<Card>& h) const{ int k=0; for(auto&x:h) if(x.suit==c.suit) ++k; return k==1; }
 };
 
-} // namespace sevens
-
-// Loader pour la DLL/SO
-
-
+}
 #ifdef BUILD_SHARED_LIB
 extern "C" sevens::PlayerStrategy* createStrategy() {
     return new sevens::HybridStrategy();

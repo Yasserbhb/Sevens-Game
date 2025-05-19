@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Compiling Sevens Game..."
-g++ -std=c++17 -Wall -Wextra -O3 \
+g++ -std=c++17 -Wall -Wextra -Werror -pedantic -pedantic-errors -O3 \
 code_skeleton/MyCardParser.cpp \
 code_skeleton/MyGameParser.cpp \
 code_skeleton/MyGameMapper.cpp \

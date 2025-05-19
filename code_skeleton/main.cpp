@@ -34,7 +34,10 @@ std::shared_ptr<PlayerStrategy> loadStrategyFromLibrary(const std::string& libra
     
     // Load the createStrategy function
     typedef PlayerStrategy* (*CreateStrategyFn)();
-    CreateStrategyFn createStrategy = (CreateStrategyFn)GetProcAddress(handle, "createStrategy");
+    // First cast to void* to avoid the function type warning
+    void* procAddress = (void*)GetProcAddress(handle, "createStrategy");
+    // Then cast to the actual function type
+    CreateStrategyFn createStrategy = reinterpret_cast<CreateStrategyFn>(procAddress);
     if (!createStrategy) {
         std::cerr << "Cannot load symbol 'createStrategy': " << GetLastError() << std::endl;
         FreeLibrary(handle);

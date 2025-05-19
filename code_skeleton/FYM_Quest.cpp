@@ -128,7 +128,7 @@ private:
     uint64_t myID;
     std::mt19937 rng;
     int roundTurn = 0;
-    int playerCount = 0;
+    uint64_t playerCount = 0;
     int consecutivePasses = 0;
     
     // Strategy weighting constants - tuned based on test results
